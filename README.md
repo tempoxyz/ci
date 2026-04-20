@@ -1,3 +1,3 @@
-# ithacaxyz/ci
+# tempoxyz/ci
 
 Common GHA CI workflows.
