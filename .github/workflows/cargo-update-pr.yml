@@ -56,35 +56,49 @@ jobs:
         # Remove first line that always just says "Updating crates.io index"
         run: cargo update --color never --verbose 2>&1 | sed '/crates.io index/d' | tee -a cargo_update.log
 
-      - name: Craft commit message and PR body
-        id: msg
-        env:
-          PR_TITLE: ${{ inputs.title }}
+      # The first-party PR action below fails when there is nothing to commit, so skip the
+      # remaining steps when `cargo update` left Cargo.lock untouched.
+      - name: Detect Cargo.lock changes
+        id: changes
         run: |
-          export cargo_update_log="$(cat cargo_update.log)"
+          if git diff --quiet -- Cargo.lock; then
+            echo "Cargo.lock is already up to date; no pull request needed"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
-          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
-          printf "%s\n\n%s\n" "$PR_TITLE" "$cargo_update_log" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+      - name: Craft PR body
+        if: steps.changes.outputs.changed == 'true'
+        id: msg
+        run: |
+          cargo_update_log="$(cat cargo_update.log)"
+          export cargo_update_log
 
-          echo "body<<EOF" >> $GITHUB_OUTPUT
-          echo "$BODY" | envsubst >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          {
+            echo "body<<EOF"
+            echo "$BODY" | envsubst
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Fetch GitHub token via STS
+        if: steps.changes.outputs.changed == 'true'
         id: sts
         uses: tempoxyz/gh-actions/actions/github-sts@8819cf80bdcb39c36c34700e3f2ecc08bde54f23 # main
         with:
           policy: cargo-update-pr
 
+      # First-party replacement for peter-evans/create-pull-request. The commit is created
+      # server-side, authored by the STS App and signed by GitHub, so author/committer inputs are
+      # not needed. The composite takes a single-line commit headline; the cargo update log stays
+      # in the PR body.
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        if: steps.changes.outputs.changed == 'true'
+        uses: tempoxyz/gh-actions/actions/create-pull-request@16356ec5155405ba5e33f5558e80b5bf77eb70ab # main
         with:
           token: ${{ steps.sts.outputs.token }}
-          author: tempo-github-sts[bot] <312736176+tempo-github-sts[bot]@users.noreply.github.com>
-          committer: tempo-github-sts[bot] <312736176+tempo-github-sts[bot]@users.noreply.github.com>
-          add-paths: ./Cargo.lock
-          commit-message: ${{ steps.msg.outputs.commit_message }}
+          branch: ${{ env.BRANCH }}
+          commit-message: ${{ inputs.title }}
           title: ${{ inputs.title }}
           body: ${{ steps.msg.outputs.body }}
-          branch: ${{ env.BRANCH }}
+          add-paths: Cargo.lock
