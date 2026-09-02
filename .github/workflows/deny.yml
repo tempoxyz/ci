@@ -28,10 +28,10 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772
+      - uses: tempoxyz/gh-actions/vendor/dtolnay/rust-toolchain@6f436eb3a168279692739e8c0c9fdb52b94bfae7
         with:
           toolchain: ${{ inputs.rust-toolchain }}
-      - uses: EmbarkStudios/cargo-deny-action@91bf2b620e09e18d6eb78b92e7861937469acedb # v2.0.17
+      - uses: tempoxyz/gh-actions/vendor/EmbarkStudios/cargo-deny-action@6f436eb3a168279692739e8c0c9fdb52b94bfae7
         with:
           command: check all
           arguments: ${{ inputs.deny-flags }}
