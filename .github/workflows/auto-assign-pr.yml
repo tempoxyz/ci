@@ -14,10 +14,14 @@ jobs:
     name: Auto Assign
     # Permissions the called workflow requests (Caller workflow must still grant these scopes to GITHUB_TOKEN)
     permissions:
+      id-token: write
       issues: write
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
+      - name: Secure runner
+        uses: tempoxyz/gh-actions/actions/secure-runner@27b9d9cb079918e6be16c8660f82bb0cf7fef6ea # main
+
       - name: Auto assign PR to author (with permission checks)
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
