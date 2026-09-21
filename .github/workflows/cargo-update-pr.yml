@@ -46,12 +46,12 @@ jobs:
       id-token: write
     steps:
       - name: Secure runner
-        uses: $/actions/secure-runner # 2026-09-21T19-33-30Z-baf48ebc
+        uses: tempoxyz/gh-actions/actions/secure-runner@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
 
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
-      - uses: tempoxyz/gh-actions/vendor/dtolnay/rust-toolchain@baf48ebcfcb26812085b8351125493b2ef8009ab # 2026-09-21T19-33-30Z-baf48ebc
+      - uses: tempoxyz/gh-actions/vendor/dtolnay/rust-toolchain@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
         with:
           toolchain: ${{ inputs.rust-toolchain }}
 
@@ -87,7 +87,7 @@ jobs:
       - name: Fetch GitHub token via STS
         if: steps.changes.outputs.changed == 'true'
         id: sts
-        uses: tempoxyz/gh-actions/actions/github-sts@baf48ebcfcb26812085b8351125493b2ef8009ab # 2026-09-21T19-33-30Z-baf48ebc
+        uses: tempoxyz/gh-actions/actions/github-sts@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
         with:
           policy: cargo-update-pr
 
@@ -97,7 +97,7 @@ jobs:
       # in the PR body.
       - name: Create Pull Request
         if: steps.changes.outputs.changed == 'true'
-        uses: tempoxyz/gh-actions/actions/create-pull-request@baf48ebcfcb26812085b8351125493b2ef8009ab # 2026-09-21T19-33-30Z-baf48ebc
+        uses: tempoxyz/gh-actions/actions/create-pull-request@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
         with:
           token: ${{ steps.sts.outputs.token }}
           branch: ${{ env.BRANCH }}
