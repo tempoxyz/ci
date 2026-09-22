@@ -24,6 +24,7 @@ jobs:
   cargo-deny:
     name: cargo deny check
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       id-token: write
@@ -37,7 +38,17 @@ jobs:
       - uses: tempoxyz/gh-actions/vendor/dtolnay/rust-toolchain@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
         with:
           toolchain: ${{ inputs.rust-toolchain }}
-      - uses: tempoxyz/gh-actions/vendor/EmbarkStudios/cargo-deny-action@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
+      - name: Install cargo-deny
+        uses: tempoxyz/gh-actions/vendor/taiki-e/install-action@bce53819ffa60fcdf8f0f349686d807e5a66a71b # 2026-09-21T21-56-41Z-bce53819
         with:
-          command: check all
-          arguments: ${{ inputs.deny-flags }}
+          tool: cargo-deny@0.20.2
+          checksum: true
+          fallback: none
+      # Keep dependency downloads on the host configured by Secure Runner.
+      - name: Check dependencies
+        shell: bash
+        env:
+          DENY_FLAGS: ${{ inputs.deny-flags }}
+        run: |
+          read -r -a deny_flags <<< "$DENY_FLAGS"
+          cargo deny "${deny_flags[@]}" check all
