@@ -11,3 +11,5 @@ The `rust-toolchain` input defaults to `nightly`. The `deny-flags` input default
 to `--all-features` and accepts whitespace-separated cargo-deny flags (for
 example, `--all-features --locked`). Set these inputs on the reusable call
 instead of duplicating the installation and check steps in each repository.
+Wrappers can also forward `runner` (default `ubuntu-latest`) and
+`timeout-minutes` (default `30`) to preserve their existing job configuration.

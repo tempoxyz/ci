@@ -13,6 +13,16 @@ on:
         default: "--all-features"
         required: false
         type: "string"
+      runner:
+        description: "Runner used for cargo deny"
+        default: "ubuntu-latest"
+        required: false
+        type: "string"
+      timeout-minutes:
+        description: "Timeout for the cargo deny job"
+        default: 30
+        required: false
+        type: "number"
 
 permissions:
   contents: read
@@ -23,8 +33,8 @@ env:
 jobs:
   cargo-deny:
     name: cargo deny check
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: ${{ inputs.timeout-minutes }}
     permissions:
       contents: read
       id-token: write
